@@ -13,6 +13,8 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 public class UserDTO {
     private Long id;
+    @NotBlank(message = "El numero de identificacion del usuario es obligatorio")
+    private String document_number;
     @NotBlank(message = "El nombre del usuario es obligatorio")
     private String first_name;
     @NotBlank(message = "Los apellidos son obligatorios")

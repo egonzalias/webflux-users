@@ -18,6 +18,7 @@ import java.time.LocalDate;
 public class UserEntity {
     @Id
     private Long id;
+    private String document_number;
     private String first_name;
     private String last_name;
     private LocalDate birth_date;

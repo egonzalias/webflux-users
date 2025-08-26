@@ -41,7 +41,6 @@ public class Handler {
     }
 
     private void validate(UserDTO userDTO) {
-        System.out.println("Validando email: '" + userDTO.getEmail() + "'");
         BindingResult errors = new BeanPropertyBindingResult(userDTO, UserDTO.class.getName());
         validator.validate(userDTO, errors);
         if (errors.hasErrors()) {
