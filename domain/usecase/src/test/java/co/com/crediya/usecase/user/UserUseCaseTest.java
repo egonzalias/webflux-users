@@ -2,6 +2,8 @@ package co.com.crediya.usecase.user;
 
 import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.model.user.User;
+import co.com.crediya.model.user.gateways.PasswordService;
+import co.com.crediya.model.user.gateways.RoleRepository;
 import co.com.crediya.model.user.gateways.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,14 +23,31 @@ public class UserUseCaseTest {
 
     @Mock
     private UserRepository repository;
+    @Mock
+    private RoleRepository roleRepository;
+
+    @Mock
+    private PasswordService passwordService;
 
     private User user;
     private UserUseCase userUseCase;
 
     @BeforeEach
     void setup(){
-        user = new User(null,"John","Doe", LocalDate.of(1995, 5, 20),"123 Main St","+1234567890","john2.doe@example.com", BigDecimal.valueOf(1400000));
-        userUseCase = new UserUseCase(repository);
+        user = User.builder()
+                .id(null)
+                .document_number("123456789")
+                .first_name("John")
+                .last_name("Doe")
+                .birth_date(LocalDate.of(1995, 5, 20))
+                .address("123 Main St")
+                .phone("+1234567890")
+                .email("john2.doe@example.com")
+                .base_salary(BigDecimal.valueOf(1400000))
+                .password("123456")
+                .role_id("ADMIN")
+                .build();
+        userUseCase = new UserUseCase(repository, roleRepository, passwordService);
     }
 
     @Test

@@ -9,6 +9,7 @@ dependencies {
     implementation "org.mapstruct:mapstruct:$mapStructVersion"
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
 
     annotationProcessor "org.mapstruct:mapstruct-processor:$mapStructVersion"
 }
