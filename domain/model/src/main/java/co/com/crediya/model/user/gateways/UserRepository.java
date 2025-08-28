@@ -5,6 +5,5 @@ import reactor.core.publisher.Mono;
 
 public interface UserRepository {
     Mono<Void> registerUser(User user);
-    Mono<Boolean> findByEmail(String email);
-    String getTest();
+    Mono<User> findByEmail(String email);
 }

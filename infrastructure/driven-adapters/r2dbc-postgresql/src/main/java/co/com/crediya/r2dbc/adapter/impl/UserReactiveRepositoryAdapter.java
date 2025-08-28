@@ -34,12 +34,8 @@ public class UserReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<Boolean> findByEmail(String email) {
-        return repository.existsByEmail(email);
+    public Mono<User> findByEmail(String email) {
+        return repository.findByEmail(email).map(entity -> mapper.map(entity, User.class));
     }
 
-    @Override
-    public String getTest() {
-        return repository.getTesting();
-    }
 }

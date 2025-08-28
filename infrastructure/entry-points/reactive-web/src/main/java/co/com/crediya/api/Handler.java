@@ -1,6 +1,7 @@
 package co.com.crediya.api;
 
 
+import co.com.crediya.api.dto.LoginDTO;
 import co.com.crediya.api.dto.UserDTO;
 import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.api.mapper.UserDTOMapper;
@@ -27,10 +28,6 @@ public class Handler {
     private final UserDTOMapper userDTOMapper;
     private final Validator validator;
 
-    public Mono<ServerResponse> listenGETOtherUseCase(ServerRequest serverRequest) {
-        return ServerResponse.ok().bodyValue(userUseCase.test());
-    }
-
     public Mono<ServerResponse> registerUser(ServerRequest serverRequest) {
         return serverRequest
                 .bodyToMono(UserDTO.class)
@@ -38,6 +35,16 @@ public class Handler {
                 .map(userDTOMapper::toModel)
                 .flatMap(userUseCase::registerUser)
                 .then(ServerResponse.status(HttpStatus.CREATED).build());
+    }
+
+    public Mono<ServerResponse> loginUser(ServerRequest serverRequest) {
+        return serverRequest
+                .bodyToMono(LoginDTO.class)
+                .flatMap(loginRequest -> userUseCase
+                        .loginUser(loginRequest.getEmail()))
+                .map(userDTOMapper::toAuthResponse)
+                .flatMap(user -> ServerResponse.ok().bodyValue(user))
+                .switchIfEmpty(ServerResponse.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     private void validate(UserDTO userDTO) {

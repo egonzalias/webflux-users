@@ -1,7 +1,6 @@
 package co.com.crediya.usecase.user;
 
 import co.com.crediya.model.exception.ValidationException;
-import co.com.crediya.model.user.Role;
 import co.com.crediya.model.user.User;
 import co.com.crediya.model.user.gateways.PasswordService;
 import co.com.crediya.model.user.gateways.RoleRepository;
@@ -19,26 +18,32 @@ public class UserUseCase {
     private final PasswordService passwordService;
 
     public Mono<Void> registerUser(User user){
+        //The block inside defer is executed only if it is really needed, i.e. when findByEmail returned empty
         return roleRepository.findRoleByName(user.getRole())
                 .switchIfEmpty(Mono.error(new ValidationException(
                         List.of("El rol '" + user.getRole() + "' es incorrecto o no existe en la base de datos.")
                 )))
                 .then(repository.findByEmail(user.getEmail()))
-                .flatMap(emailExists -> {
-                    if (emailExists) {
-                        return Mono.error(new ValidationException(
+                .flatMap(existingUser ->
+                        Mono.error(new ValidationException(
                                 List.of("El correo electrónico ya está registrado")
-                        ));
-                    }
-
-                    user.setPassword(passwordService.encode(user.getPassword()));
-                    return repository.registerUser(user).then();
-                });
-
-
+                        ))
+                )
+                .switchIfEmpty(
+                        Mono.defer(() -> {
+                            user.setPassword(passwordService.encode(user.getPassword()));
+                            return repository.registerUser(user);
+                        })
+                ).then();
     }
 
-    public String test(){
-        return "Hello!!! GONZA!!!";
+    public Mono<User> loginUser(String email){
+        return repository.findByEmail(email)
+                .map(user -> User.builder()
+                        .email(user.getEmail())
+                        .password(user.getPassword())
+                        .role(user.getRole())
+                        .build());
     }
+
 }
