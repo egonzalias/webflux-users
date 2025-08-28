@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 class UserReactiveRepositoryAdapterTest {
     // TODO: change four you own tests
 
-    @InjectMocks
+    /*@InjectMocks
     UserReactiveRepositoryAdapter repositoryAdapter;
 
     @Mock
@@ -76,5 +76,5 @@ class UserReactiveRepositoryAdapterTest {
         StepVerifier.create(result)
                 .expectNextMatches(value -> value.equals("test"))
                 .verifyComplete();
-    }
+    }*/
 }

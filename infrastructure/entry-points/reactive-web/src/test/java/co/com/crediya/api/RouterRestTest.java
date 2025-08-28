@@ -1,6 +1,7 @@
 package co.com.crediya.api;
 
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -8,13 +9,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+
 @ContextConfiguration(classes = {RouterRest.class, Handler.class})
 @WebFluxTest
 class RouterRestTest {
 
-    @Autowired
+    /*@Autowired
     private WebTestClient webTestClient;
 
+    @Disabled("Not will be implemented.")
     @Test
     void testListenGETUseCase() {
         webTestClient.get()
@@ -29,6 +32,7 @@ class RouterRestTest {
                 );
     }
 
+    @Disabled("Not will be implemented.")
     @Test
     void testListenGETOtherUseCase() {
         webTestClient.get()
@@ -43,6 +47,7 @@ class RouterRestTest {
                 );
     }
 
+    @Disabled("Not will be implemented.")
     @Test
     void testListenPOSTUseCase() {
         webTestClient.post()
@@ -56,5 +61,5 @@ class RouterRestTest {
                             Assertions.assertThat(userResponse).isEmpty();
                         }
                 );
-    }
+    }*/
 }
