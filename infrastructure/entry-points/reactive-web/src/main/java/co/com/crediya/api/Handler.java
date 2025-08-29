@@ -45,7 +45,7 @@ public class Handler {
                         .loginUser(loginRequest.getEmail()))
                 .map(userDTOMapper::toAuthResponse)
                 .flatMap(user -> ServerResponse.ok().bodyValue(user))
-                .switchIfEmpty(ServerResponse.status(HttpStatus.UNAUTHORIZED).build());
+                .switchIfEmpty(ServerResponse.status(HttpStatus.NOT_FOUND).build());
     }
 
     private void validate(Object objDTO) {
