@@ -100,7 +100,7 @@ public class UserUseCaseTest {
                 .verifyComplete();
     }
 
-    /*@Test
+    @Test
     void shouldReturnUser_whenEmailExists() {
         when(repository.findByEmail(anyString())).thenReturn(Mono.just(user));
 
@@ -111,5 +111,5 @@ public class UserUseCaseTest {
                                         u.getPassword().equals(user.getPassword())
                         )
                 .verifyComplete();
-    }*/
+    }
 }

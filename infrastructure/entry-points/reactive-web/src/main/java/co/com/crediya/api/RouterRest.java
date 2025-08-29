@@ -22,6 +22,7 @@ import static org.springframework.web.reactive.function.server.RouterFunctions.r
 @Configuration
 public class RouterRest {
 
+    @Bean
     @RouterOperations({
             @RouterOperation(
                     path = "/api/v1/usuarios", method = RequestMethod.POST,
@@ -48,7 +49,6 @@ public class RouterRest {
                     operation = @Operation(summary = "Login a user")
             )
     })
-    @Bean
     public RouterFunction<ServerResponse> routerFunction(Handler handler) {
         return route(POST("/api/v1/usuarios"), handler::registerUser)
                 .and(route(POST("/api/v1/login"), handler::loginUser));
