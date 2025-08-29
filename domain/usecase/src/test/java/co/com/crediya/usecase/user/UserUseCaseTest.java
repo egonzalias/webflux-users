@@ -112,4 +112,17 @@ public class UserUseCaseTest {
                         )
                 .verifyComplete();
     }
+
+    @Test
+    void shouldReturnUser_whenEmailDoesNotExists() {
+        when(repository.findByEmail(anyString())).thenReturn(Mono.empty());
+
+        StepVerifier.create(userUseCase.loginUser("testnotexists@test.com"))
+                .expectNextMatches(u ->
+                        u.getEmail().equals(user.getEmail()) &&
+                                u.getRole().equals(user.getRole()) &&
+                                u.getPassword().equals(user.getPassword())
+                )
+                .verifyComplete();
+    }
 }

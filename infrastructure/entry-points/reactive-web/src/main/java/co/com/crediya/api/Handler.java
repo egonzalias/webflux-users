@@ -40,6 +40,7 @@ public class Handler {
     public Mono<ServerResponse> loginUser(ServerRequest serverRequest) {
         return serverRequest
                 .bodyToMono(LoginDTO.class)
+                .doOnNext(this::validate)
                 .flatMap(loginRequest -> userUseCase
                         .loginUser(loginRequest.getEmail()))
                 .map(userDTOMapper::toAuthResponse)
@@ -47,9 +48,9 @@ public class Handler {
                 .switchIfEmpty(ServerResponse.status(HttpStatus.UNAUTHORIZED).build());
     }
 
-    private void validate(UserDTO userDTO) {
-        BindingResult errors = new BeanPropertyBindingResult(userDTO, UserDTO.class.getName());
-        validator.validate(userDTO, errors);
+    private void validate(Object objDTO) {
+        BindingResult errors = new BeanPropertyBindingResult(objDTO, objDTO.getClass().getName());
+        validator.validate(objDTO, errors);
         if (errors.hasErrors()) {
             List<String> messages = errors.getAllErrors()
                     .stream()
