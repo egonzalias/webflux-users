@@ -16,4 +16,6 @@ public class LoginDTO {
     @NotBlank(message = "El correo electrónico es obligatorio")
     @Email(message = "El correo electrónico no es válido", regexp = ".+@.+\\..+")
     private String email;
+    @NotBlank(message = "La clave del usuario es obligatoria")
+    private String password;
 }

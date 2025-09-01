@@ -4,6 +4,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Getter
@@ -12,7 +13,9 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class AuthUserDTO {
-    private String email;
-    private String password;
-    private String role;
+    //private String email;
+    //private String password;
+    //private String role;
+    private String jwtToken;
+    //private Instant expiresAt;
 }

@@ -2,10 +2,7 @@ package co.com.crediya.usecase.user;
 
 import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.model.user.User;
-import co.com.crediya.model.user.gateways.LoggerService;
-import co.com.crediya.model.user.gateways.PasswordService;
-import co.com.crediya.model.user.gateways.RoleRepository;
-import co.com.crediya.model.user.gateways.UserRepository;
+import co.com.crediya.model.user.gateways.*;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -17,6 +14,7 @@ public class UserUseCase {
     private final UserRepository repository;
     private final RoleRepository roleRepository;
     private final PasswordService passwordService;
+    private final TokenService tokenService;
     private final LoggerService logger;
 
     public Mono<Void> registerUser(User user){
@@ -42,12 +40,27 @@ public class UserUseCase {
                 ).then();
     }
 
-    public Mono<User> loginUser(String email){
-        return repository.findByEmail(email)
+    public Mono<User> authenticateUser(User authUser){
+        return repository.findByEmail(authUser.getEmail())
+                .switchIfEmpty(Mono.defer(() -> {
+                    logger.info("Autenticacion fallida: el correo '{}' no existe en la base de datos.", authUser.getEmail());
+                    return Mono.error(new ValidationException(
+                            List.of("El correo electrónico no esta registrado.")
+                    ));
+                }))
+                .flatMap(user -> {
+                    if(passwordService.matches(authUser.getPassword(), user.getPassword())){
+                        String jwtToken = tokenService.generateToken(user);
+                        user.setJwtToken(jwtToken);
+                        return Mono.just(user);
+                    } else {
+                        return Mono.error(new ValidationException(
+                                List.of("La contraseña es incorrecta.")
+                        ));
+                    }
+                })
                 .map(user -> User.builder()
-                        .email(user.getEmail())
-                        .password(user.getPassword())
-                        .role(user.getRole())
+                        .jwtToken(user.getJwtToken())
                         .build());
     }
 

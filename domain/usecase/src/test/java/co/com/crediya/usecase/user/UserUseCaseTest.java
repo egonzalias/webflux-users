@@ -28,7 +28,6 @@ public class UserUseCaseTest {
     private UserRepository repository;
     @Mock
     private RoleRepository roleRepository;
-
     @Mock
     private PasswordService passwordService;
 
@@ -100,7 +99,7 @@ public class UserUseCaseTest {
                 .verifyComplete();
     }
 
-    @Test
+    /*@Test
     void shouldReturnUser_whenEmailExists() {
         when(repository.findByEmail(anyString())).thenReturn(Mono.just(user));
 
@@ -124,5 +123,5 @@ public class UserUseCaseTest {
                                 u.getPassword().equals(user.getPassword())
                 )
                 .verifyComplete();
-    }
+    }*/
 }

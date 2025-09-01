@@ -1,9 +1,9 @@
 package co.com.crediya.model.user;
 import lombok.*;
-//import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -22,4 +22,6 @@ public class User {
     private BigDecimal base_salary;
     private String password;
     private String role;
+    private String jwtToken;
+    private Date expiresAt;
 }
