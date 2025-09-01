@@ -1,0 +1,134 @@
+[1mdiff --git a/domain/usecase/src/test/java/co/com/crediya/usecase/user/UserUseCaseTest.java b/domain/usecase/src/test/java/co/com/crediya/usecase/user/UserUseCaseTest.java[m
+[1mindex 7a98948..23ba703 100644[m
+[1m--- a/domain/usecase/src/test/java/co/com/crediya/usecase/user/UserUseCaseTest.java[m
+[1m+++ b/domain/usecase/src/test/java/co/com/crediya/usecase/user/UserUseCaseTest.java[m
+[36m@@ -3,10 +3,7 @@[m [mpackage co.com.crediya.usecase.user;[m
+ import co.com.crediya.model.exception.ValidationException;[m
+ import co.com.crediya.model.user.Role;[m
+ import co.com.crediya.model.user.User;[m
+[31m-import co.com.crediya.model.user.gateways.LoggerService;[m
+[31m-import co.com.crediya.model.user.gateways.PasswordService;[m
+[31m-import co.com.crediya.model.user.gateways.RoleRepository;[m
+[31m-import co.com.crediya.model.user.gateways.UserRepository;[m
+[32m+[m[32mimport co.com.crediya.model.user.gateways.*;[m
+ import org.junit.jupiter.api.Assertions;[m
+ import org.junit.jupiter.api.BeforeEach;[m
+ import org.junit.jupiter.api.Test;[m
+[36m@@ -30,6 +27,8 @@[m [mpublic class UserUseCaseTest {[m
+     private RoleRepository roleRepository;[m
+     @Mock[m
+     private PasswordService passwordService;[m
+[32m+[m[32m    @Mock[m
+[32m+[m[32m    private TokenService tokenService;[m
+ [m
+     @Mock[m
+     LoggerService loggerService;[m
+[36m@@ -41,6 +40,7 @@[m [mpublic class UserUseCaseTest {[m
+ [m
+     @BeforeEach[m
+     void setup(){[m
+[32m+[m[32m        userUseCase = new UserUseCase(repository, roleRepository, passwordService, tokenService, loggerService);[m
+         user = User.builder()[m
+                 .id(null)[m
+                 .document_number("123456789")[m
+[36m@@ -51,7 +51,7 @@[m [mpublic class UserUseCaseTest {[m
+                 .phone("+1234567890")[m
+                 .email("john.doe@example.com")[m
+                 .base_salary(BigDecimal.valueOf(1400000))[m
+[31m-                .password("123456")[m
+[32m+[m[32m                .password("hashedPassword123")[m
+                 .role("ADMIN")[m
+                 .build();[m
+         role = Role.builder()[m
+[36m@@ -59,8 +59,6 @@[m [mpublic class UserUseCaseTest {[m
+                 .name("ADMIN")[m
+                 .description("")[m
+                 .build();[m
+[31m-[m
+[31m-        userUseCase = new UserUseCase(repository, roleRepository, passwordService, loggerService);[m
+     }[m
+ [m
+     @Test[m
+[36m@@ -92,36 +90,64 @@[m [mpublic class UserUseCaseTest {[m
+     void shouldRegisterUserSuccessfully_whenRoleAndEmailAreValid() {[m
+         when(roleRepository.findRoleByName(anyString())).thenReturn(Mono.just(role));[m
+         when(repository.findByEmail(anyString())).thenReturn(Mono.empty());[m
+[31m-        when(passwordService.encode(anyString())).thenReturn("hashedPassword");[m
+[32m+[m[32m        when(passwordService.encode(anyString())).thenReturn("hashedPassword123");[m
+         when(repository.registerUser(any(User.class))).thenReturn(Mono.empty());[m
+ [m
+         StepVerifier.create(userUseCase.registerUser(user))[m
+                 .verifyComplete();[m
+     }[m
+ [m
+[31m-    /*@Test[m
+[31m-    void shouldReturnUser_whenEmailExists() {[m
+[31m-        when(repository.findByEmail(anyString())).thenReturn(Mono.just(user));[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    void shouldReturnJwtToken_whenAuthenticationIsSuccessful() {[m
+[32m+[m[32m        User loginAttempt = user.toBuilder()[m
+[32m+[m[32m                .email("john.doe@example.com")[m
+[32m+[m[32m                .password("123456")[m
+[32m+[m[32m                .build();[m
+[32m+[m
+[32m+[m[32m        when(repository.findByEmail(loginAttempt.getEmail())).thenReturn(Mono.just(user));[m
+[32m+[m[32m        when(passwordService.matches("123456", "hashedPassword123")).thenReturn(true);[m
+[32m+[m[32m        when(tokenService.generateToken(user)).thenReturn("mocked-jwt-token");[m
+ [m
+[31m-        StepVerifier.create(userUseCase.loginUser("test@test.com"))[m
+[32m+[m[32m        StepVerifier.create(userUseCase.authenticateUser(loginAttempt))[m
+                 .expectNextMatches(u ->[m
+[31m-                                u.getEmail().equals(user.getEmail()) &&[m
+[31m-                                        u.getRole().equals(user.getRole()) &&[m
+[31m-                                        u.getPassword().equals(user.getPassword())[m
+[32m+[m[32m                                "mocked-jwt-token".equals(u.getJwtToken())[m
+                         )[m
+                 .verifyComplete();[m
+     }[m
+ [m
+     @Test[m
+[31m-    void shouldReturnUser_whenEmailDoesNotExists() {[m
+[31m-        when(repository.findByEmail(anyString())).thenReturn(Mono.empty());[m
+[32m+[m[32m    void shouldThrowValidationException_whenEmailNotFound() {[m
+[32m+[m[32m        User loginAttempt = user.toBuilder()[m
+[32m+[m[32m                .email("test@crediya.com")[m
+[32m+[m[32m                .password("123456")[m
+[32m+[m[32m                .build();[m
+[32m+[m
+[32m+[m[32m        when(repository.findByEmail(loginAttempt.getEmail())).thenReturn(Mono.empty());[m
+[32m+[m
+[32m+[m[32m        StepVerifier.create(userUseCase.authenticateUser(loginAttempt))[m
+[32m+[m[32m                .expectErrorSatisfies(error ->{[m
+[32m+[m[32m                    ValidationException ve = (ValidationException) error;[m
+[32m+[m[32m                    Assertions.assertTrue(ve.getErrors().stream().anyMatch( msg -> msg.contains("El correo electrónico no esta registrado")));[m
+[32m+[m[32m                })[m
+[32m+[m[32m                .verify();[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    @Test[m
+[32m+[m[32m    void shouldThrowValidationException_whenPasswordIsWrong() {[m
+[32m+[m[32m        User loginAttempt = user.toBuilder()[m
+[32m+[m[32m                .email("test@crediya.com")[m
+[32m+[m[32m                .password("wrongPassword")[m
+[32m+[m[32m                .build();[m
+[32m+[m
+[32m+[m[32m        when(repository.findByEmail(loginAttempt.getEmail())).thenReturn(Mono.just(user));[m
+[32m+[m[32m        when(passwordService.matches(loginAttempt.getPassword(), user.getPassword())).thenReturn(false);[m
+[32m+[m
+[32m+[m[32m        StepVerifier.create(userUseCase.authenticateUser(loginAttempt))[m
+[32m+[m[32m                .expectErrorSatisfies(error ->{[m
+[32m+[m[32m                    ValidationException ve = (ValidationException) error;[m
+[32m+[m[32m                    Assertions.assertTrue(ve.getErrors().stream().anyMatch( msg -> msg.contains("La contraseña es incorrecta")));[m
+[32m+[m[32m                })[m
+[32m+[m[32m                .verify();[m
+[32m+[m[32m    }[m
+ [m
+[31m-        StepVerifier.create(userUseCase.loginUser("testnotexists@test.com"))[m
+[31m-                .expectNextMatches(u ->[m
+[31m-                        u.getEmail().equals(user.getEmail()) &&[m
+[31m-                                u.getRole().equals(user.getRole()) &&[m
+[31m-                                u.getPassword().equals(user.getPassword())[m
+[31m-                )[m
+[31m-                .verifyComplete();[m
+[31m-    }*/[m
+ }[m
