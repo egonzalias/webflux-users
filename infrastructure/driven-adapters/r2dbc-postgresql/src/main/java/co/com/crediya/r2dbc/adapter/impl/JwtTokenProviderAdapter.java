@@ -38,6 +38,7 @@ public class JwtTokenProviderAdapter implements TokenService {
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getEmail())
+                .claim("documentNumber", user.getDocument_number())
                 .claim("role", user.getRole())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
