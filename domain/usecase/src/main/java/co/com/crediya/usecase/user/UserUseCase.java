@@ -32,6 +32,13 @@ public class UserUseCase {
                             List.of("El correo electrónico ya está registrado")
                     ));
                 })
+                .then(repository.findByDocumentNumber(user.getDocument_number()))
+                .flatMap(existingUser ->{
+                    logger.info("Registro fallido: el documento '{}' ya está registrado", user.getDocument_number());
+                    return Mono.error(new ValidationException(
+                            List.of("El documento "+user.getDocument_number()+" ya está registrado.")
+                    ));
+                })
                 .switchIfEmpty(
                         Mono.defer(() -> {
                             user.setPassword(passwordService.encode(user.getPassword()));
