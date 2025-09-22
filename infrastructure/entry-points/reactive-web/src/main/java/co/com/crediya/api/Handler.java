@@ -1,12 +1,20 @@
 package co.com.crediya.api;
 
 
+import co.com.crediya.api.dto.AuthUserDTO;
 import co.com.crediya.api.dto.LoginDTO;
 import co.com.crediya.api.dto.UserDTO;
+import co.com.crediya.api.exception.ErrorResponse;
 import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.api.mapper.UserDTOMapper;
 import co.com.crediya.model.user.User;
 import co.com.crediya.usecase.user.UserUseCase;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -31,6 +39,25 @@ public class Handler {
     private final UserDTOMapper userDTOMapper;
     private final Validator validator;
 
+    @Operation(
+            summary = "Registrar usuario",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "Usuario creado exitosamente"
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Error de validación",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Error interno",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
     public Mono<ServerResponse> registerUser(ServerRequest serverRequest) {
         return serverRequest
                 .bodyToMono(UserDTO.class)
@@ -55,6 +82,33 @@ public class Handler {
                 });*/
     }
 
+    @Operation(
+            summary = "Autenticar usuario",
+            description = "Valida las credenciales del usuario y devuelve un token JWT si son correctas",
+            requestBody = @RequestBody(
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = LoginDTO.class)
+                    )
+            ),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Usuario autenticado correctamente",
+                            content = @Content(schema = @Schema(implementation = AuthUserDTO.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "Error de validación",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "Usuario no encontrado",
+                            content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    )
+            }
+    )
     public Mono<ServerResponse> authenticateUser(ServerRequest serverRequest) {
         return serverRequest
                 .bodyToMono(LoginDTO.class)
