@@ -7,6 +7,9 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.Components;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import io.swagger.v3.oas.models.servers.Server;
+
+import java.util.List;
 
 @Configuration
 public class OpenAPIConfig {
@@ -20,6 +23,10 @@ public class OpenAPIConfig {
                         .title("Mi API")
                         .version("1.0")
                         .description("Documentación de la API con autenticación JWT"))
+                .servers(List.of(
+                        new Server().url("http://localhost:8080").description("Servidor Local"),
+                        new Server().url("https://v6ljwkpmn3.execute-api.us-east-1.amazonaws.com").description("Servidor Producción")
+                ))
                 .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
                 .components(new Components()
                         .addSecuritySchemes(securitySchemeName,
