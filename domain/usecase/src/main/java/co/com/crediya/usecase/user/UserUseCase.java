@@ -20,32 +20,39 @@ public class UserUseCase {
     public Mono<Void> registerUser(User user){
         //The block inside defer is executed only if it is really needed, i.e. when findByEmail returned empty
         return roleRepository.findRoleByName(user.getRole())
-                .switchIfEmpty(Mono.defer(()-> {
+                .switchIfEmpty(Mono.defer(() -> {
                     logger.info("Registro fallido: el rol '{}' no es válido", user.getRole());
                     return Mono.error(new ValidationException(
-                            List.of("El rol '" + user.getRole() + "' es incorrecto o no existe en la base de datos.")));
+                            List.of("El rol '" + user.getRole() + "' es incorrecto o no existe en la base de datos.")
+                    ));
                 }))
-                .then(repository.findByEmail(user.getEmail()))
-                .flatMap(existingUser ->{
-                    logger.info("Registro fallido: el correo '{}' ya está registrado", user.getEmail());
-                    return Mono.error(new ValidationException(
-                            List.of("El correo electrónico ya está registrado")
-                    ));
-                })
-                .then(repository.findByDocumentNumber(user.getDocument_number()))
-                .flatMap(existingUser ->{
-                    logger.info("Registro fallido: el documento '{}' ya está registrado", user.getDocument_number());
-                    return Mono.error(new ValidationException(
-                            List.of("El documento "+user.getDocument_number()+" ya está registrado.")
-                    ));
-                })
-                .switchIfEmpty(
-                        Mono.defer(() -> {
-                            user.setPassword(passwordService.encode(user.getPassword()));
-                            return repository.registerUser(user);
-                        })
-                ).then();
+                .flatMap(role ->
+                        repository.findByEmail(user.getEmail())
+                                .flatMap(existingUser -> {
+                                    logger.info("Registro fallido: el correo '{}' ya está registrado", user.getEmail());
+                                    return Mono.error(new ValidationException(
+                                            List.of("El correo electrónico ya está registrado")
+                                    ));
+                                })
+                                .switchIfEmpty(
+                                        repository.findByDocumentNumber(user.getDocument_number())
+                                                .flatMap(existingUser -> {
+                                                    logger.info("Registro fallido: el documento '{}' ya está registrado", user.getDocument_number());
+                                                    return Mono.error(new ValidationException(
+                                                            List.of("El documento " + user.getDocument_number() + " ya está registrado.")
+                                                    ));
+                                                })
+                                                .switchIfEmpty(
+                                                        Mono.defer(() -> {
+                                                            user.setPassword(passwordService.encode(user.getPassword()));
+                                                            return repository.registerUser(user);
+                                                        })
+                                                )
+                                )
+                )
+                .then();
     }
+
 
     public Mono<User> authenticateUser(User authUser){
         return repository.findByEmail(authUser.getEmail())

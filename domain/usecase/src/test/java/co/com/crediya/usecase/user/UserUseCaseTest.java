@@ -64,7 +64,6 @@ public class UserUseCaseTest {
     @Test
     void shouldThrowValidationException_whenRoleDoesNotExist() {
         when(roleRepository.findRoleByName(anyString())).thenReturn(Mono.empty());
-        when(repository.findByEmail(anyString())).thenReturn(Mono.empty());
 
         StepVerifier.create(userUseCase.registerUser(user)).expectErrorSatisfies(error ->{
             ValidationException ve = (ValidationException) error;
@@ -78,6 +77,7 @@ public class UserUseCaseTest {
     void shouldThrowValidationException_whenEmailAlreadyExists() {
         when(roleRepository.findRoleByName(anyString())).thenReturn(Mono.just(role));
         when(repository.findByEmail(anyString())).thenReturn(Mono.just(user));
+        when(repository.findByDocumentNumber(anyString())).thenReturn(Mono.empty());
 
         StepVerifier.create(userUseCase.registerUser(user)).expectErrorSatisfies(error ->{
             ValidationException ve = (ValidationException) error;
@@ -90,6 +90,7 @@ public class UserUseCaseTest {
     void shouldRegisterUserSuccessfully_whenRoleAndEmailAreValid() {
         when(roleRepository.findRoleByName(anyString())).thenReturn(Mono.just(role));
         when(repository.findByEmail(anyString())).thenReturn(Mono.empty());
+        when(repository.findByDocumentNumber(anyString())).thenReturn(Mono.empty());
         when(passwordService.encode(anyString())).thenReturn("hashedPassword123");
         when(repository.registerUser(any(User.class))).thenReturn(Mono.empty());
 

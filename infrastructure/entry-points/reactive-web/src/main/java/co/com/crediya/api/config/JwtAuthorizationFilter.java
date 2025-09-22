@@ -30,19 +30,26 @@ public class JwtAuthorizationFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         String path = exchange.getRequest().getURI().getPath();
-
+        System.out.println("Authorization header path : " + path);
         List<String> publicPaths = List.of(
                 "/api/v1/login",
                 "/swagger-ui", "/swagger-ui.html", "/swagger-ui/",
-                "/v3/api-docs"
+                "/v3/api-docs",
+                "/actuator/health",
+                "/actuator/info"
         );
 
-        boolean isPublic = publicPaths.stream().anyMatch(path::startsWith);
+        //boolean isPublic = publicPaths.stream().anyMatch(path::startsWith);
+        boolean isPublic = publicPaths.stream()
+                .anyMatch(publicPath -> path.equals(publicPath) || path.startsWith(publicPath + "/"));
+        System.out.println("Authorization header isPublic : " + isPublic);
         if (isPublic) {
             return chain.filter(exchange); // no validate token
         }
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        System.out.println("Authorization header EGR: " + authHeader);
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ") || authHeader.length() <= 7) {
             // No token provided - reject
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
