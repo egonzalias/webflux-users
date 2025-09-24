@@ -41,6 +41,13 @@ public class Handler {
 
     @Operation(
             summary = "Registrar usuario",
+            description = "Permite registrar un usuario al sistema de crediya, bien sea admin, asesor o cliente",
+            requestBody = @RequestBody(
+                    required = true,
+                    content = @Content(
+                            schema = @Schema(implementation = UserDTO.class)
+                    )
+            ),
             responses = {
                     @ApiResponse(
                             responseCode = "201",
@@ -50,6 +57,14 @@ public class Handler {
                             responseCode = "400",
                             description = "Error de validación",
                             content = @Content(schema = @Schema(implementation = ErrorResponse.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Acceso prohibido"
+                    ),
+                    @ApiResponse(
+                            responseCode = "403",
+                            description = "Acceso denegado o rol invalido para realizar esta accion."
                     ),
                     @ApiResponse(
                             responseCode = "500",
